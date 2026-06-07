@@ -1,0 +1,171 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  transition: var(--transition);
+  position: relative;
+}
+
+.card:hover {
+  border-color: rgba(124, 58, 237, 0.2);
+  background: var(--bg-hover);
+  transform: translateX(2px);
+}
+
+.optimistic {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.deleting {
+  opacity: 0.4;
+  pointer-events: none;
+  transform: scale(0.98);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.wordCount {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.deleteBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+}
+
+.card:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.content {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  color: var(--text-accent);
+  font-size: 0.8125rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  padding: 6px 0 0;
+  transition: var(--transition);
+}
+
+.expandBtn:hover {
+  color: var(--accent-light);
+}
+
+.highlight {
+  background: rgba(124, 58, 237, 0.25);
+  color: var(--accent-light);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* Related dumps */
+.related {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.relatedToggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  transition: var(--transition);
+  letter-spacing: 0.01em;
+}
+
+.relatedToggle:hover {
+  color: var(--text-accent);
+}
+
+.relatedChevron {
+  font-size: 0.65rem;
+  margin-left: auto;
+}
+
+.relatedList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  animation: fadeIn 0.2s ease;
+}
+
+.relatedItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.relatedItem:hover {
+  border-color: var(--border-accent);
+  background: var(--accent-subtle);
+}
+
+.relatedEmoji {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.relatedContent {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

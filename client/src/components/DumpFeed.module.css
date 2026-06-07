@@ -1,0 +1,119 @@
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyBanner {
+  text-align: center;
+  padding: 24px 16px 20px;
+}
+
+.emptyTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.emptySubtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.placeholderList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.placeholderCard {
+  position: relative;
+}
+
+.placeholderCard::after {
+  content: 'example';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 2px 7px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}
+
+.searchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 14px;
+}
+
+.searchInfo {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton {
+  height: 90px;
+  border-radius: var(--radius-md);
+}
+
+.noResults {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loader {
+  padding: 24px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
+}
+
+.loadingDots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.loadingDots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.loadingDots span:nth-child(1) { animation: typing-dot 1.2s 0s infinite; }
+.loadingDots span:nth-child(2) { animation: typing-dot 1.2s 0.2s infinite; }
+.loadingDots span:nth-child(3) { animation: typing-dot 1.2s 0.4s infinite; }
+
+.endText {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}

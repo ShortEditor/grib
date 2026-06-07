@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GRIB Mobile — Brain Dump</title>
+  <meta name="description" content="GRIB Mobile — dump your thoughts from anywhere" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GRIB" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.07);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-accent: rgba(139, 92, 246, 0.3);
+      --text-primary: #e4e4e7;
+      --text-secondary: #71717a;
+      --text-muted: #52525b;
+      --accent: #8b5cf6;
+      --accent-light: #a78bfa;
+      --accent-dark: #6d28d9;
+      --accent-glow: rgba(139, 92, 246, 0.35);
+      --success: #34d399;
+      --success-glow: rgba(52, 211, 153, 0.25);
+      --danger: #f87171;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient glow background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -40%;
+      left: -20%;
+      width: 140%;
+      height: 60%;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-brand .emoji {
+      font-size: 26px;
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 6px var(--accent-glow)); }
+      50% { filter: drop-shadow(0 0 14px var(--accent-glow)); }
+    }
+
+    .header-brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success-glow);
+      animation: blink 2.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Main Content ── */
+    .main {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Dump Input Area ── */
+    .dump-area {
+      padding: 16px 20px 12px;
+      flex-shrink: 0;
+    }
+
+    .dump-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dump-card:focus-within {
+      border-color: var(--border-accent);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.08), inset 0 0 20px rgba(139, 92, 246, 0.03);
+    }
+
+    .dump-textarea {
+      width: 100%;
+      min-height: 100px;
+      max-height: 180px;
+      resize: none;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .dump-textarea::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .dump-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .word-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dump-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .dump-btn::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .dump-btn:active {
+      transform: scale(0.96);
+    }
+
+    .dump-btn:not(:disabled):hover,
+    .dump-btn:not(:disabled):focus {
+      box-shadow: 0 0 24px var(--accent-glow), 0 4px 16px rgba(139, 92, 246, 0.2);
+    }
+
+    .dump-btn:not(:disabled):hover::before {
+      opacity: 1;
+    }
+
+    .dump-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .dump-btn .btn-icon {
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .dump-btn:not(:disabled):active .btn-icon {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    /* Success animation */
+    .dump-btn.success {
+      background: linear-gradient(135deg, #059669, #34d399);
+      box-shadow: 0 0 24px var(--success-glow);
+    }
+
+    /* ── Dumps List ── */
+    .dumps-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 0 20px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .dump-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .dumps-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 24px;
+    }
+
+    .dumps-list::-webkit-scrollbar {
+      width: 3px;
+    }
+    .dumps-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .dumps-list::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 3px;
+    }
+
+    .dump-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      animation: slide-up 0.35s ease-out forwards;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dump-item:active {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+    }
+
+    @keyframes slide-up {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dump-content {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-primary);
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .dump-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .dump-meta .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 20px;
+      color: var(--accent-light);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dump-meta .source {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px;
+      text-align: center;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Toast Notification ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(20, 20, 30, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      z-index: 100;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success { border-color: rgba(52, 211, 153, 0.3); }
+    .toast.error   { border-color: rgba(248, 113, 113, 0.3); }
+
+    /* ── Loading Spinner ── */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Ripple effect ── */
+    @keyframes ripple {
+      0% {
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="header-brand">
+      <span class="emoji">🧠</span>
+      <h1>GRIB Mobile</h1>
+    </div>
+    <div class="header-status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connected</span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Dump Area -->
+    <div class="dump-area">
+      <div class="dump-card" id="dumpCard">
+        <textarea
+          class="dump-textarea"
+          id="dumpInput"
+          placeholder="dump your thoughts..."
+          rows="4"
+          maxlength="5000"
+          autocomplete="off"
+          spellcheck="true"
+        ></textarea>
+        <div class="dump-footer">
+          <span class="word-count" id="wordCount">0 words</span>
+          <button class="dump-btn" id="dumpBtn" disabled>
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">Dump</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dumps List -->
+    <div class="dumps-section">
+      <div class="section-header">
+        <span class="section-title">Recent Dumps</span>
+        <span class="dump-count" id="dumpCount">0 dumps</span>
+      </div>
+      <div class="dumps-list" id="dumpsList">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">💭</div>
+          <p>No dumps yet.<br/>Start dumping your thoughts above.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ── Supabase Init ──
+    const SUPABASE_URL = 'https://xrfrbhqjwgcpvmngipfl.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_eHdgeos9Z80rdBhP8ZuA-w_3IlWYY5W';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ── LocalStorage key ──
+    const LS_KEY = 'grib_mobile_dumps';
+
+    // ── DOM refs ──
+    const dumpInput     = document.getElementById('dumpInput');
+    const dumpBtn       = document.getElementById('dumpBtn');
+    const wordCountEl   = document.getElementById('wordCount');
+    const dumpsList     = document.getElementById('dumpsList');
+    const dumpCountEl   = document.getElementById('dumpCount');
+    const emptyState    = document.getElementById('emptyState');
+    const toast         = document.getElementById('toast');
+    const statusDot     = document.getElementById('statusDot');
+    const statusText    = document.getElementById('statusText');
+
+    // ── State ──
+    let allDumps = [];
+    let isSending = false;
+
+    // ── Utility ──
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    function timeAgo(date) {
+      const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+      if (seconds < 60) return 'just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function showToast(message, type = 'success') {
+      toast.textContent = message;
+      toast.className = 'toast ' + type;
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    // ── LocalStorage ──
+    function loadFromStorage() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveToStorage(dumps) {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(dumps));
+      } catch (e) {
+        console.warn('localStorage save failed:', e);
+      }
+    }
+
+    // ── Render ──
+    function renderDumps() {
+      if (allDumps.length === 0) {
+        emptyState.style.display = 'flex';
+        dumpCountEl.textContent = '0 dumps';
+        // Clear all items except empty state
+        const items = dumpsList.querySelectorAll('.dump-item');
+        items.forEach(el => el.remove());
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      dumpCountEl.textContent = `${allDumps.length} dump${allDumps.length !== 1 ? 's' : ''}`;
+
+      // Sort newest first
+      const sorted = [...allDumps].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      dumpsList.innerHTML = '';
+
+      sorted.forEach((dump, i) => {
+        const item = document.createElement('div');
+        item.className = 'dump-item';
+        item.style.animationDelay = `${i * 0.04}s`;
+
+        const sourceIcon = dump.source === 'mobile' ? '📱' : '💻';
+        const sourceLabel = dump.source === 'mobile' ? 'Mobile' : 'Laptop';
+
+        item.innerHTML = `
+          <div class="dump-content">${escapeHtml(dump.content)}</div>
+          <div class="dump-meta">
+            <span class="tag">${escapeHtml(dump.mood_tag || 'random')}</span>
+            <span class="source">${sourceIcon} ${sourceLabel}</span>
+            <span>·</span>
+            <span>${dump.word_count || 0} words</span>
+            <span>·</span>
+            <span>${timeAgo(dump.created_at)}</span>
+          </div>
+        `;
+
+        dumpsList.appendChild(item);
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ── Input handling ──
+    dumpInput.addEventListener('input', () => {
+      const words = countWords(dumpInput.value);
+      wordCountEl.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+      dumpBtn.disabled = dumpInput.value.trim().length === 0 || isSending;
+
+      // Auto-resize textarea
+      dumpInput.style.height = 'auto';
+      dumpInput.style.height = Math.min(dumpInput.scrollHeight, 180) + 'px';
+    });
+
+    // ── Dump action ──
+    dumpBtn.addEventListener('click', async () => {
+      const content = dumpInput.value.trim();
+      if (!content || isSending) return;
+
+      isSending = true;
+      dumpBtn.disabled = true;
+      const origHtml = dumpBtn.innerHTML;
+      dumpBtn.innerHTML = '<span class="spinner"></span>';
+
+      const wordCount = countWords(content);
+      const now = new Date().toISOString();
+
+      const newDump = {
+        local_id: generateId(),
+        content,
+        mood_tag: 'random',
+        word_count: wordCount,
+        source: 'mobile',
+        created_at: now,
+      };
+
+      // 1. Save to localStorage immediately
+      allDumps.unshift(newDump);
+      saveToStorage(allDumps);
+      renderDumps();
+
+      // 2. Push to Supabase
+      try {
+        const { data, error } = await supabase.from('dumps_sync').insert({
+          content: newDump.content,
+          mood_tag: newDump.mood_tag,
+          word_count: newDump.word_count,
+          source: 'mobile',
+          created_at: newDump.created_at,
+          synced_to_laptop: false,
+          synced_to_mobile: true,
+        }).select();
+
+        if (error) throw error;
+
+        // Update local dump with cloud ID
+        if (data && data[0]) {
+          newDump.id = data[0].id;
+          saveToStorage(allDumps);
+        }
+
+        showToast('⚡ Dumped & synced!', 'success');
+        dumpBtn.innerHTML = '<span class="btn-icon">✓</span><span class="btn-text">Done!</span>';
+        dumpBtn.classList.add('success');
+      } catch (err) {
+        console.error('Supabase push failed:', err);
+        showToast('Saved locally. Cloud sync will retry.', 'error');
+        dumpBtn.innerHTML = origHtml;
+      }
+
+      // Clear input
+      dumpInput.value = '';
+      dumpInput.style.height = 'auto';
+      wordCountEl.textContent = '0 words';
+
+      setTimeout(() => {
+        dumpBtn.innerHTML = origHtml;
+        dumpBtn.classList.remove('success');
+        isSending = false;
+        dumpBtn.disabled = true; // because input is now empty
+      }, 1200);
+    });
+
+    // ── Merge dumps (dedup by content + timestamp) ──
+    function mergeDumps(localDumps, cloudDumps) {
+      const seen = new Set();
+      const merged = [];
+
+      // Helper to create a dedup key
+      function dedupKey(dump) {
+        const content = (dump.content || '').trim();
+        const ts = dump.created_at || '';
+        return `${content}|||${ts}`;
+      }
+
+      // Add local dumps first
+      for (const d of localDumps) {
+        const key = dedupKey(d);
+        if (!seen.has(key)) {
+          seen.add(key);
+          merged.push(d);
+        }
+      }
+
+      // Merge cloud dumps
+      for (const d of cloudDumps) {
+        const key = dedupKey(d);
+        if (!seen.has(key)) {
+          seen.add(key);
+          merged.push(d);
+        }
+      }
+
+      return merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
+    // ── Fetch from Supabase ──
+    async function fetchCloudDumps() {
+      try {
+        const { data, error } = await supabase
+          .from('dumps_sync')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.error('Cloud fetch failed:', err);
+        statusDot.style.background = 'var(--danger)';
+        statusDot.style.boxShadow = '0 0 6px rgba(248, 113, 113, 0.4)';
+        statusText.textContent = 'Offline';
+        return [];
+      }
+    }
+
+    // ── Init ──
+    async function init() {
+      // 1. Load from localStorage immediately
+      const localDumps = loadFromStorage();
+      allDumps = localDumps;
+      renderDumps();
+
+      // 2. Fetch from Supabase in background
+      const cloudDumps = await fetchCloudDumps();
+
+      if (cloudDumps.length > 0) {
+        allDumps = mergeDumps(localDumps, cloudDumps);
+        saveToStorage(allDumps);
+        renderDumps();
+
+        // Mark laptop dumps as synced to mobile so cloud can clean up
+        const laptopDumpIds = cloudDumps
+          .filter(d => d.source === 'laptop' && !d.synced_to_mobile)
+          .map(d => d.id);
+        if (laptopDumpIds.length > 0) {
+          supabase
+            .from('dumps_sync')
+            .update({ synced_to_mobile: true })
+            .in('id', laptopDumpIds)
+            .then(({ error }) => {
+              if (error) console.error('Mobile sync mark failed:', error);
+              // Also cleanup fully synced dumps
+              supabase
+                .from('dumps_sync')
+                .delete()
+                .eq('synced_to_laptop', true)
+                .eq('synced_to_mobile', true)
+                .then(() => {});
+            });
+        }
+      }
+
+      statusDot.style.background = 'var(--success)';
+      statusDot.style.boxShadow = '0 0 6px var(--success-glow)';
+      statusText.textContent = 'Connected';
+    }
+
+    init();
+
+    // ── Keyboard handling for mobile ──
+    dumpInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 768) {
+        e.preventDefault();
+        dumpBtn.click();
+      }
+    });
+
+    // Prevent iOS zoom on input focus
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+  </script>
+
+</body>
+</html>
