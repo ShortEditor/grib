@@ -4,7 +4,6 @@ const verifyToken = require('../middleware/auth');
 const { detectMoodTag } = require('../services/groq');
 const { findRelatedDumps } = require('../services/similarity');
 const { maybeUpdateProfile } = require('../services/profile');
-const { pushToCloud } = require('../services/sync');
 
 const router = express.Router();
 router.use(verifyToken);
@@ -45,9 +44,6 @@ router.post('/', async (req, res) => {
 
     // Profile update — fires every 5 dumps, silent
     maybeUpdateProfile(req.userId);
-
-    // Push to cloud for cross-device sync (non-blocking)
-    pushToCloud(dump).catch(err => console.error('Cloud sync failed:', err.message));
 
     res.status(201).json({ ...dump, related });
   } catch (err) {

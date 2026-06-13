@@ -30,9 +30,5 @@ app.use('/api/feedback', feedbackRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'GRIB' }));
 
-// Start cloud sync (pulls mobile dumps on startup + every 5 min)
-const { startSync } = require('./services/sync');
-startSync();
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 GRIB server running on http://localhost:${PORT}`));
