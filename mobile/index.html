@@ -520,7 +520,8 @@
     // ── Supabase Init ──
     const SUPABASE_URL = 'https://xrfrbhqjwgcpvmngipfl.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_eHdgeos9Z80rdBhP8ZuA-w_3IlWYY5W';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // ── LocalStorage key ──
     const LS_KEY = 'grib_mobile_dumps';
@@ -678,7 +679,7 @@
 
       // 2. Push to Supabase
       try {
-        const { data, error } = await supabase.from('dumps_sync').insert({
+        const { data, error } = await sb.from('dumps_sync').insert({
           content: newDump.content,
           mood_tag: newDump.mood_tag,
           word_count: newDump.word_count,
@@ -754,7 +755,7 @@
     // ── Fetch from Supabase ──
     async function fetchCloudDumps() {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
           .from('dumps_sync')
           .select('*')
           .order('created_at', { ascending: false })
@@ -791,14 +792,14 @@
           .filter(d => d.source === 'laptop' && !d.synced_to_mobile)
           .map(d => d.id);
         if (laptopDumpIds.length > 0) {
-          supabase
+          sb
             .from('dumps_sync')
             .update({ synced_to_mobile: true })
             .in('id', laptopDumpIds)
             .then(({ error }) => {
               if (error) console.error('Mobile sync mark failed:', error);
               // Also cleanup fully synced dumps
-              supabase
+              sb
                 .from('dumps_sync')
                 .delete()
                 .eq('synced_to_laptop', true)
